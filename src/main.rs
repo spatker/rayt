@@ -12,6 +12,6 @@ fn main() {
         &Vec3{x: 0.0, y: -10.0, z: 0.0},
         &Vec3{x: 0.0, y: 0.0, z: 0.0},
         &Vec3n::new(0.0, 0.0, 1.0));
-    let img = camera.take_picture();
+    let img = camera.take_picture(render::Resolution::new(600,600));
     img.save("img.ppm").unwrap();
 }

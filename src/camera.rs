@@ -1,6 +1,8 @@
 use crate::vec3::{Vec3, Vec3n};
-use crate::render::Image;
+use crate::render::{Image, Resolution};
 use crate::color::Color;
+
+use rayon::prelude::*;
 
 pub struct Camera {
     pos: Vec3,
@@ -20,14 +22,12 @@ impl Camera {
         Camera {pos: *pos, plane_pos, rigth, up}
     }
 
-    pub fn take_picture(&self) -> Image {
-        let mut img = Image::new(600, 600);
-        for x in 0..img.get_height(){
-            for y in 0.. img.get_width(){
-                let color = self.capture_pixel(x as f32, y as f32);
-                img.set_color(x, y, color);
-            }
-        }
+    pub fn take_picture(&self, resolution: Resolution) -> Image {
+        let mut img = Image::new(resolution);
+        img.get_data().par_iter_mut().enumerate().for_each(|(idx, color)| {
+            let (h,w) = resolution.get_height_width(idx);
+            *color = self.capture_pixel(h as f32, w as f32);
+        });
 
         img
     }
