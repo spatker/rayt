@@ -1,11 +1,19 @@
 pub mod sphere;
+pub mod light;
+pub mod material;
 use crate::ray::{Ray, Intersection};
+use crate::color::Color;
+use crate::object::light::Light;
 
 pub trait Intersect {
     fn intersect(&self, ray: &Ray) -> Intersection;
 }
 
-pub trait Object: Intersect {}
+pub trait Shade {
+    fn get_color(&self, intersection: &Intersection, lights: &[Light]) -> Color;
+}
+
+pub trait Object: Intersect + Shade {}
 
 pub enum Solution {
     TwoRoots{t1: f32, t2: f32},

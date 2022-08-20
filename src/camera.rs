@@ -1,7 +1,6 @@
 use crate::vec3::{Vec3, Vec3n};
 use crate::render::{Image, Resolution};
 use crate::color::Color;
-use crate::object::Object;
 use crate::scene::Scene;
 use crate::ray::Ray;
 

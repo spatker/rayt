@@ -1,15 +1,18 @@
 use crate::vec3::{Vec3, Vec3n};
-use crate::object::{Object, Intersect, Solution, solve_quadratic};
+use crate::object::{Object, Intersect, Shade, Solution, material::Material, solve_quadratic};
 use crate::ray::{Ray, Intersection};
+use crate::object::light::Light;
+use crate::color::Color;
 
 pub struct Sphere{
     pos: Vec3,
     r: f32,
+    material: Material,
 }
 
 impl Sphere {
-    pub fn new(pos: Vec3, r: f32) -> Sphere {
-        Sphere{pos, r}
+    pub fn new(pos: Vec3, r: f32, material: Material) -> Sphere {
+        Sphere{pos, r, material}
     }
 }
 
@@ -29,6 +32,12 @@ impl Intersect for Sphere {
                 Intersection::Hit{normal, pos, t}
             },
         }
+    }
+}
+
+impl Shade for Sphere {
+    fn get_color(&self, intersection: &Intersection, lights: &[Light]) -> Color {
+        self.material.get_color(intersection, lights)
     }
 }
 

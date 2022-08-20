@@ -152,6 +152,30 @@ impl Mul for Vec3n {
     }
 }
 
+impl Mul<Vec3n> for &Vec3n {
+    type Output = f32;
+
+    fn mul(self, rhs: Vec3n) -> f32 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
+    }
+}
+
+impl Mul for &Vec3n {
+    type Output = f32;
+
+    fn mul(self, rhs: &Vec3n) -> f32 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
+    }
+}
+
+impl Mul<&Vec3n> for Vec3n {
+    type Output = f32;
+
+    fn mul(self, rhs: &Vec3n) -> f32 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
+    }
+}
+
 impl Mul<Vec3n> for Vec3 {
     type Output = f32;
 

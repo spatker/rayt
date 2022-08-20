@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Div};
+use std::ops::{Add, Sub, Div, Mul};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
@@ -45,6 +45,54 @@ impl Div<f32> for Color {
             r: self.r/rhs,
             g: self.g/rhs,
             b: self.b/rhs,
+        }
+    }
+}
+
+impl Mul<Color> for f32 {
+    type Output = Color;
+
+    fn mul(self, rhs: Color) -> Color {
+        Color {
+            r: rhs.r * self,
+            g: rhs.g * self,
+            b: rhs.b * self,
+        }
+    }
+}
+
+impl Mul<&Color> for f32 {
+    type Output = Color;
+
+    fn mul(self, rhs: &Color) -> Color {
+        Color {
+            r: rhs.r * self,
+            g: rhs.g * self,
+            b: rhs.b * self,
+        }
+    }
+}
+
+impl Mul for Color {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self {
+        Color {
+            r: rhs.r * self.r,
+            g: rhs.g * self.g,
+            b: rhs.b * self.b,
+        }
+    }
+}
+
+impl Mul<&Color> for Color {
+    type Output = Self;
+
+    fn mul(self, rhs: &Self) -> Self {
+        Color {
+            r: rhs.r * self.r,
+            g: rhs.g * self.g,
+            b: rhs.b * self.b,
         }
     }
 }
