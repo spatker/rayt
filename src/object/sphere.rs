@@ -26,7 +26,7 @@ impl Intersect for Sphere {
                 let t = f32::min(t1,t2);
                 let normal = Vec3n::from((ray.at(t) - self.pos)/self.r);
                 let pos = ray.at(t);
-                Intersection::Hit{normal, pos}
+                Intersection::Hit{normal, pos, t}
             },
         }
     }

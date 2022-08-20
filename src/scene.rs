@@ -31,13 +31,22 @@ impl Scene {
         self.camera.take_picture(resolution, &self)
     }
 
-    pub fn trace(&self, ray: &Ray) -> Color {
+    pub fn first_intersect(&self, ray: &Ray) -> Intersection {
         self.objs.iter().map(|o|{
-            let intersection = o.intersect(ray);
-            match intersection {
-                Intersection::Miss => Color::new(0.0),
-                Intersection::Hit{pos, normal} =>  Color::new(1.0)
+            o.intersect(ray)
+        }).reduce(|a, b| {
+            match Intersection::min(&a,&b) {
+                true => a,
+                false => b
             }
-        }).last().unwrap()
+        }).unwrap_or_default()
+    }
+
+    pub fn trace(&self, ray: &Ray) -> Color {
+        let intersection = self.first_intersect(ray);
+        match intersection {
+            Intersection::Miss => Color::new(0.0),
+            Intersection::Hit{pos, normal, t} => Color::new(1.0)
+        }
     }
 }
