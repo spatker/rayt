@@ -112,6 +112,54 @@ impl Mul<f32> for Vec3 {
     }
 }
 
+impl Mul<Vec3> for f32 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: rhs.x * self,
+            y: rhs.y * self,
+            z: rhs.z * self,
+        }
+    }
+}
+
+impl Mul<Vec3n> for f32 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3n) -> Vec3 {
+        Vec3 {
+            x: rhs.x * self,
+            y: rhs.y * self,
+            z: rhs.z * self,
+        }
+    }
+}
+
+impl Mul for Vec3 {
+    type Output = f32;
+
+    fn mul(self, rhs: Self) -> f32 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
+    }
+}
+
+impl Mul for Vec3n {
+    type Output = f32;
+
+    fn mul(self, rhs: Self) -> f32 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
+    }
+}
+
+impl Mul<Vec3n> for Vec3 {
+    type Output = f32;
+
+    fn mul(self, rhs: Vec3n) -> f32 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
+    }
+}
+
 impl Sub for &Vec3 {
     type Output = Vec3;
 
@@ -152,6 +200,18 @@ impl Div<f32> for &Vec3 {
     type Output = Vec3;
 
     fn div(self, rhs: f32) -> Vec3 {
+        Vec3 {
+            x: self.x/rhs,
+            y: self.y/rhs,
+            z: self.z/rhs,
+        }
+    }
+}
+
+impl Div<f32> for Vec3 {
+    type Output = Self;
+
+    fn div(self, rhs: f32) -> Self {
         Vec3 {
             x: self.x/rhs,
             y: self.y/rhs,

@@ -4,6 +4,7 @@ mod render;
 mod camera;
 mod ray;
 mod scene;
+mod object;
 
 use scene::Scene;
 
