@@ -6,6 +6,8 @@ use crate::object::sphere::{Sphere};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 
+use rayon::prelude::*;
+
 
 pub struct Scene {
     camera: Camera,
@@ -32,14 +34,14 @@ impl Scene {
     }
 
     pub fn first_intersect(&self, ray: &Ray) -> Intersection {
-        self.objs.iter().map(|o|{
+        self.objs.par_iter().map(|o|{
             o.intersect(ray)
-        }).reduce(|a, b| {
+        }).reduce(|| Intersection::default(), |a, b| {
             match Intersection::min(&a,&b) {
                 true => a,
                 false => b
             }
-        }).unwrap_or_default()
+        })
     }
 
     pub fn trace(&self, ray: &Ray) -> Color {
