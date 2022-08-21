@@ -20,7 +20,7 @@ impl Shade for Material {
                         let intensity = f32::max(normal * dir, 0.0);
                         radiance = radiance + match self {
                             Material::Diffuse{color: material_color} =>  intensity * light_color * material_color
-                        } 
+                        };
                     },
                     Light::Point{pos, dir, color} => {},
                 }

@@ -54,7 +54,7 @@ impl Scene {
         let (object, intersection) = self.first_intersect(ray);
         match intersection {
             Intersection::Miss => Color::new(0.0),
-            Intersection::Hit{pos, normal, t} => {
+            Intersection::Hit{..} => {
                 object.get_color(&intersection, &self.lights)
             }
         }

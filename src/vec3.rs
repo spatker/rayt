@@ -1,5 +1,3 @@
-use std::ops::{Add, Sub, Neg, Div, Mul};
-
 use std::ops;
 
 #[derive(Debug, Clone, Copy)]
@@ -48,7 +46,7 @@ impl Vec3n {
 
 impl From<f32> for Vec3 {
     fn from(a: f32) -> Self {
-        Vec3{x: a, y: a, z:a}
+        Vec3{x: a, y: a, z: a}
     }
 }
 
