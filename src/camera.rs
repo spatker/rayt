@@ -16,7 +16,7 @@ pub struct Camera {
 impl Camera {
     pub fn new(fov: f32, eye: &Vec3, target: &Vec3, plane_up: &Vec3n) -> Self {
         let pos = eye;
-        let plane_pos = eye + &(target - eye).norm();
+        let plane_pos = eye + (target - eye).norm();
         let fwd = Vec3n::from(plane_pos - *pos);
         let plane_half_size = ((fov*std::f32::consts::PI/180.0)/2.0).tan();
         let rigth = Vec3n::from(Vec3::from(fwd.cross(plane_up)) * plane_half_size);

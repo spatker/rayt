@@ -24,7 +24,7 @@ impl Intersect for Sphere {
         let solution = solve_quadratic(a, b, c);
         match solution {
             Solution::None => Intersection::Miss,
-            Solution::OneRoot{t:_} => Intersection::Miss,
+            Solution::OneRoot{..} => Intersection::Miss,
             Solution::TwoRoots{t1, t2} => {
                 let t = f32::min(t1,t2);
                 let normal = Vec3n::from((ray.at(t) - self.pos)/self.r);

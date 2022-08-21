@@ -6,6 +6,8 @@ mod ray;
 mod scene;
 mod object;
 
+#[macro_use] extern crate impl_ops;
+
 use scene::Scene;
 
 fn main() {

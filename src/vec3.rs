@@ -1,5 +1,7 @@
 use std::ops::{Add, Sub, Neg, Div, Mul};
 
+use std::ops;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
     pub x: f32,
@@ -76,170 +78,54 @@ impl From<Vec3> for Vec3n {
     }
 }
 
-impl Add for &Vec3 {
-    type Output = Vec3;
-
-    fn add(self, rhs: Self) -> Vec3 {
-        Vec3 {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
-        }
+impl_op_ex!(+ |a: &Vec3, b: &Vec3| -> Vec3 {
+    Vec3 {
+        x: a.x + b.x,
+        y: a.y + b.y,
+        z: a.z + b.z,
     }
-}
+});
 
-impl Add for Vec3 {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self {
-        Vec3 {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
-        }
+impl_op_ex!(- |a: &Vec3, b: &Vec3| -> Vec3 {
+    Vec3 {
+        x: a.x - b.x,
+        y: a.y - b.y,
+        z: a.z - b.z,
     }
-}
+});
 
-impl Mul<f32> for Vec3 {
-    type Output = Self;
+impl_op_ex!(* |a: &Vec3, b: &Vec3| -> f32 {
+    a.x * b.x + a.y * b.y + a.z * b.z 
+});
 
-    fn mul(self, rhs: f32) -> Self {
-        Vec3 {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
-        }
+impl_op_ex!(* |a: &Vec3n, b: &Vec3n| -> f32 {
+    a.x * b.x + a.y * b.y + a.z * b.z 
+});
+
+impl_op_ex_commutative!(* |a: &Vec3n, b: &Vec3| -> f32 {
+    a.x * b.x + a.y * b.y + a.z * b.z 
+});
+
+impl_op_ex_commutative!(* |a: &Vec3, b: f32| -> Vec3 {
+    Vec3 {
+        x: a.x * b,
+        y: a.y * b,
+        z: a.z * b,
     }
-}
+});
 
-impl Mul<Vec3> for f32 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3) -> Vec3 {
-        Vec3 {
-            x: rhs.x * self,
-            y: rhs.y * self,
-            z: rhs.z * self,
-        }
+impl_op_ex_commutative!(* |a: &Vec3n, b: f32| -> Vec3 {
+    Vec3 {
+        x: a.x * b,
+        y: a.y * b,
+        z: a.z * b,
     }
-}
+});
 
-impl Mul<Vec3n> for f32 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3n) -> Vec3 {
-        Vec3 {
-            x: rhs.x * self,
-            y: rhs.y * self,
-            z: rhs.z * self,
-        }
+impl_op_ex!(/ |a: &Vec3, b: f32| -> Vec3 {
+    Vec3 {
+        x: a.x / b,
+        y: a.y / b,
+        z: a.z / b,
     }
-}
-
-impl Mul for Vec3 {
-    type Output = f32;
-
-    fn mul(self, rhs: Self) -> f32 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
-    }
-}
-
-impl Mul for Vec3n {
-    type Output = f32;
-
-    fn mul(self, rhs: Self) -> f32 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
-    }
-}
-
-impl Mul<Vec3n> for &Vec3n {
-    type Output = f32;
-
-    fn mul(self, rhs: Vec3n) -> f32 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
-    }
-}
-
-impl Mul for &Vec3n {
-    type Output = f32;
-
-    fn mul(self, rhs: &Vec3n) -> f32 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
-    }
-}
-
-impl Mul<&Vec3n> for Vec3n {
-    type Output = f32;
-
-    fn mul(self, rhs: &Vec3n) -> f32 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
-    }
-}
-
-impl Mul<Vec3n> for Vec3 {
-    type Output = f32;
-
-    fn mul(self, rhs: Vec3n) -> f32 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z 
-    }
-}
-
-impl Sub for &Vec3 {
-    type Output = Vec3;
-
-    fn sub(self, rhs: Self) -> Vec3 {
-        Vec3 {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
-        }
-    }
-}
-
-impl Sub for Vec3 {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self {
-        Vec3 {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
-        }
-    }
-}
-
-impl Neg for Vec3 {
-    type Output = Self;
-
-    fn neg(self) -> Self {
-        Vec3 {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
-    }
-}
-
-impl Div<f32> for &Vec3 {
-    type Output = Vec3;
-
-    fn div(self, rhs: f32) -> Vec3 {
-        Vec3 {
-            x: self.x/rhs,
-            y: self.y/rhs,
-            z: self.z/rhs,
-        }
-    }
-}
-
-impl Div<f32> for Vec3 {
-    type Output = Self;
-
-    fn div(self, rhs: f32) -> Self {
-        Vec3 {
-            x: self.x/rhs,
-            y: self.y/rhs,
-            z: self.z/rhs,
-        }
-    }
-}
+});

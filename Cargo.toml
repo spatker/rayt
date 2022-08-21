@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rayon = "1.5.3"
+impl_ops = "0.1.1"
