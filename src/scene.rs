@@ -7,6 +7,7 @@ use crate::object::material::Material;
 use crate::object::sphere::{Sphere};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
+use crate::color::hex_color;
 
 use rayon::prelude::*;
 
@@ -31,7 +32,7 @@ impl Scene {
         objs.push(Box::new(sphere));
         let lights = vec![
             Light::Directional{dir: Vec3n::new(0.0, 0.0, -1.0), color: Color::new(0.5)},
-            Light::Ambient{color: Color{r: 135./255., g: 206./255., b: 235./255.}}
+            Light::Ambient{color: hex_color!("#87CEEB")}
         ];
         Scene{camera, objs, lights}
     }
