@@ -11,23 +11,8 @@ impl Ray {
     }
 }
 
-pub enum Intersection {
-    Hit { pos: Vec3, normal: Vec3n, t: f32},
-    Miss,
-}
-
-impl Default for Intersection {
-    fn default() -> Intersection {
-        Intersection::Miss
-    }
-}
-
-impl Intersection {
-    pub fn min(a: &Intersection, b: &Intersection) -> bool {
-        match (a,b) {
-            (Intersection::Miss, _) => false,
-            (_, Intersection::Miss) => true,
-            (Intersection::Hit{t:ta, ..}, Intersection::Hit{t:tb, ..}) => { ta < tb },
-        }
-    }
+pub struct Intersection {
+   pub pos: Vec3,
+   pub normal: Vec3n,
+   pub t: f32
 }

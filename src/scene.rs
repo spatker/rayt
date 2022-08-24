@@ -39,24 +39,29 @@ impl Scene {
         self.camera.take_picture(resolution, &self)
     }
 
-    pub fn first_intersect(&self, ray: &Ray) -> (&Box<dyn Object + Sync>, Intersection) {
+    pub fn first_intersect(&self, ray: &Ray) -> Option<(&Box<dyn Object + Sync>, Intersection)> {
         self.objs.par_iter().map(|o|{
-            (o, o.intersect(ray))
-        }).reduce(|| (&self.objs[0], Intersection::default()), |a, b| {
-            match Intersection::min(&a.1,&b.1) {
-                true => a,
-                false => b
+            match o.intersect(ray) {
+                Some(intersection) => Some((o, intersection)),
+                None => None
+            }
+        }).reduce(|| None, |a, b| {
+            match (&a, &b) {
+                (Some((_, Intersection{t: ta,..})), Some((_, Intersection{t: tb,..}))) => {
+                    if ta < tb { a } else { b }
+                },
+                (Some(_), None) => a,
+                (None, Some(_)) => b,
+                _ => None,
             }
         })
     }
 
     pub fn trace(&self, ray: &Ray) -> Color {
-        let (object, intersection) = self.first_intersect(ray);
-        match intersection {
-            Intersection::Miss => Color::new(0.0),
-            Intersection::Hit{..} => {
-                object.get_color(&intersection, &self.lights)
-            }
+        if let Some((object, intersection)) = self.first_intersect(ray){
+            object.get_color(&intersection, &self.lights)
+        } else {
+            Color::new(0.0)
         }
     }
 }

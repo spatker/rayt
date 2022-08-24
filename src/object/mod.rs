@@ -6,7 +6,7 @@ use crate::color::Color;
 use crate::object::light::Light;
 
 pub trait Intersect {
-    fn intersect(&self, ray: &Ray) -> Intersection;
+    fn intersect(&self, ray: &Ray) -> Option<Intersection>;
 }
 
 pub trait Shade {
