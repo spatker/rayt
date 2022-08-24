@@ -61,7 +61,7 @@ impl Scene {
         if let Some((object, intersection)) = self.first_intersect(ray){
             object.get_color(&intersection, &self.lights)
         } else {
-            Color::new(0.0)
+            Color::default()
         }
     }
 }

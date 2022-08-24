@@ -30,7 +30,7 @@ impl Image {
     pub fn new(resolution: Resolution) -> Image {
         Image {
             resolution,
-            data: vec![Color::new(0.0); resolution.width * resolution.height].into_boxed_slice()
+            data: vec![Color::default(); resolution.width * resolution.height].into_boxed_slice()
         }
     }
 

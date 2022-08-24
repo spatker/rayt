@@ -13,6 +13,10 @@ impl Color {
     }
 }
 
+impl Default for Color {
+    fn default() -> Self { Color::new(0.0) }
+}
+
 impl_op_ex!(+ |a: &Color, b: &Color| -> Color {
     Color {
         r: a.r + b.r,
