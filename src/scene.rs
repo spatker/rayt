@@ -26,11 +26,12 @@ impl Scene {
             &Vec3n::new(0.0, 0.0, 1.0)
         );
 
-        let sphere = Sphere::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, 3.0, Material::Diffuse{color: Color::new(0.5)});
+        let sphere = Sphere::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, 3.0, Material::Diffuse{color_diffuse: Color::new(0.5), color_ambient: Color::new(0.1)});
         let mut objs: Vec<Box<dyn Object + Sync>> = Vec::new();
         objs.push(Box::new(sphere));
         let lights = vec![
-            Light::Directional{dir: Vec3n::new(0.0, 0.0, -1.0), color: Color::new(0.5)}
+            Light::Directional{dir: Vec3n::new(0.0, 0.0, -1.0), color: Color::new(0.5)},
+            Light::Ambient{color: Color{r: 135./255., g: 206./255., b: 235./255.}}
         ];
         Scene{camera, objs, lights}
     }
@@ -61,7 +62,14 @@ impl Scene {
         if let Some((object, intersection)) = self.first_intersect(ray){
             object.get_color(&intersection, &self.lights)
         } else {
-            Color::default()
+            self.lights.par_iter().map(|light|{
+                match light {
+                    Light::Ambient{color: light_color} => *light_color,
+                    _ => Color::default()
+                }
+            }).reduce(|| Color::default(), |a, b| {
+                a + b
+            })
         }
     }
 }

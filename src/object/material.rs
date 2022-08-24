@@ -6,7 +6,7 @@ use crate::object::Shade;
 use rayon::prelude::*;
 
 pub enum Material {
-    Diffuse {color: Color}
+    Diffuse {color_diffuse: Color, color_ambient: Color}
 }
 
 impl Shade for Material {
@@ -14,11 +14,15 @@ impl Shade for Material {
     {
         lights.par_iter().map(|light|{
             match light {
-                Light::Ambient{..} => todo!("Ambient ligth"),
+                Light::Ambient{color: light_color} => {
+                    match self {
+                        Material::Diffuse{color_ambient: material_color, ..} =>  light_color * material_color,
+                    }
+                }
                 Light::Directional{dir, color: light_color} => {
                     let intensity = f32::max(intersection.normal * dir, 0.0);
                     match self {
-                        Material::Diffuse{color: material_color} => intensity * light_color * material_color,
+                        Material::Diffuse{color_diffuse: material_color, ..} => intensity * light_color * material_color,
                     }
                 },
                 Light::Point{pos, dir, color} => todo!("Point ligth"),
