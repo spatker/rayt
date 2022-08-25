@@ -22,19 +22,28 @@ impl Scene {
         let camera = Camera::new(
             90.0, 
             &Vec3{x: 0.0, y: -10.0, z: 3.0},
-            &Vec3{x: 0.0, y: 0.0, z: 0.0},
+            &Vec3{x: 0.0, y: -3.0, z: 4.0},
             &Vec3n::new(0.0, 0.0, 1.0)
         );
 
-        let sphere = Sphere::new(Vec3{x: 0.0, y: 0.0, z: 3.0}, 3.0, Material::Diffuse{color_diffuse: Color::new(0.5), color_ambient: Color::new(0.1)});
-        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Material::Diffuse{color_diffuse: Color::new(0.5), color_ambient: Color::new(0.1)});
+        let color_sky = Color::from_hex("#0396A6").unwrap();
+        let color_orange = Color::from_hex("#F29F80").unwrap();
+        let color_red = Color::from_hex("#D95578").unwrap();
+
+
         let mut objs: Vec<Box<dyn Object + Sync>> = Vec::new();
+        let sphere = Sphere::new(Vec3{x: 0.0, y: -3.0, z: 5.0}, 3.0, Material::Diffuse{color_diffuse: color_red, color_ambient: color_red * 0.4});
         objs.push(Box::new(sphere));
+        let sphere = Sphere::new(Vec3{x: 4.0, y: 0.0, z: 3.0}, 3.0, Material::Diffuse{color_diffuse: color_red, color_ambient: color_red * 0.4});
+        objs.push(Box::new(sphere));
+        let sphere = Sphere::new(Vec3{x: -4.0, y: 0.0, z: 3.0}, 3.0, Material::Diffuse{color_diffuse: color_red, color_ambient: color_red * 0.4});
+        objs.push(Box::new(sphere));
+        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Material::Diffuse{color_diffuse: color_orange, color_ambient: color_orange * 0.4});
         objs.push(Box::new(plane));
 
         let lights = vec![
-            Light::Directional{dir: Vec3n::new(0.0, 0.0, 1.0), color: Color::new(0.5)},
-            Light::Ambient{color: Color::from_hex("#87CEEB").unwrap()}
+            Light::Directional{dir: Vec3n::new(0.0, 0.0, 1.0), color: Color::new(1.0)},
+            Light::Ambient{color: color_sky}
         ];
         Scene{camera, objs, lights}
     }
