@@ -1,4 +1,5 @@
 pub mod sphere;
+pub mod plane;
 pub mod light;
 pub mod material;
 use crate::ray::{Ray, Intersection};

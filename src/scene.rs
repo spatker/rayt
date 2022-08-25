@@ -4,7 +4,7 @@ use crate::vec3::{Vec3, Vec3n};
 use crate::object::Object;
 use crate::object::light::Light;
 use crate::object::material::Material;
-use crate::object::sphere::{Sphere};
+use crate::object::{sphere::Sphere, plane::Plane};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 
@@ -21,16 +21,19 @@ impl Scene {
     pub fn new() -> Scene {
         let camera = Camera::new(
             90.0, 
-            &Vec3{x: 0.0, y: -10.0, z: 0.0},
+            &Vec3{x: 0.0, y: -10.0, z: 3.0},
             &Vec3{x: 0.0, y: 0.0, z: 0.0},
             &Vec3n::new(0.0, 0.0, 1.0)
         );
 
-        let sphere = Sphere::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, 3.0, Material::Diffuse{color_diffuse: Color::new(0.5), color_ambient: Color::new(0.1)});
+        let sphere = Sphere::new(Vec3{x: 0.0, y: 0.0, z: 3.0}, 3.0, Material::Diffuse{color_diffuse: Color::new(0.5), color_ambient: Color::new(0.1)});
+        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Material::Diffuse{color_diffuse: Color::new(0.5), color_ambient: Color::new(0.1)});
         let mut objs: Vec<Box<dyn Object + Sync>> = Vec::new();
         objs.push(Box::new(sphere));
+        objs.push(Box::new(plane));
+
         let lights = vec![
-            Light::Directional{dir: Vec3n::new(0.0, 0.0, -1.0), color: Color::new(0.5)},
+            Light::Directional{dir: Vec3n::new(0.0, 0.0, 1.0), color: Color::new(0.5)},
             Light::Ambient{color: Color::from_hex("#87CEEB").unwrap()}
         ];
         Scene{camera, objs, lights}
