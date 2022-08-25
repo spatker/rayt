@@ -18,7 +18,7 @@ impl Resolution {
     }
 
     pub fn get_height_width(&self, i: usize) -> (usize, usize) {
-        (i/self.width,i%self.width)
+        (self.width - i/self.width,i%self.width)
     }
 }
 
