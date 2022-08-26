@@ -36,8 +36,8 @@ impl Intersect for Sphere {
 }
 
 impl Shade for Sphere {
-    fn get_color(&self, intersection: &Intersection, lights: &[Light]) -> Color {
-        self.material.get_color(intersection, lights)
+    fn get_color(&self, intersection: &Intersection, light: &Light) -> Color {
+        self.material.get_color(intersection, light)
     }
 }
 

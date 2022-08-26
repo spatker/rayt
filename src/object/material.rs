@@ -4,40 +4,34 @@ use crate::object::light::Light;
 use crate::object::Shade;
 use crate::vec3::{Vec3, Vec3n};
 
-use rayon::prelude::*;
-
 pub enum Material {
     Diffuse {color_diffuse: Color, color_ambient: Color}
 }
 
 impl Shade for Material {
-    fn get_color(&self, intersection: &Intersection, lights: &[Light]) -> Color
+    fn get_color(&self, intersection: &Intersection, light: &Light) -> Color
     {
-        lights.par_iter().map(|light|{
-            match light {
-                Light::Ambient{color: light_color} => {
-                    match self {
-                        Material::Diffuse{color_ambient: material_color, ..} =>  light_color * material_color,
-                    }
+        match light {
+            Light::Ambient{color: light_color} => {
+                match self {
+                    Material::Diffuse{color_ambient: material_color, ..} =>  light_color * material_color,
                 }
-                Light::Directional{dir, color: light_color} => {
-                    let intensity = f32::max(intersection.normal * dir, 0.0);
-                    match self {
-                        Material::Diffuse{color_diffuse: material_color, ..} => intensity * light_color * material_color,
-                    }
-                },
-                Light::Point{pos, color: light_color} => {
-                    let v = pos - intersection.pos;
-                    let attenuation = (1.0/v.len())*(1.0/v.len());
-                    let intensity = f32::max(intersection.normal * Vec3n::from(v), 0.0);
-                    match self {
-                        Material::Diffuse{color_diffuse: material_color, ..} =>
-                            attenuation * intensity * light_color * material_color,
-                    }
-                },
             }
-        }).reduce(|| Color::default(), |a, b| {
-            a + b
-        })
+            Light::Directional{direction, color: light_color} => {
+                let intensity = f32::max(intersection.normal * direction, 0.0);
+                match self {
+                    Material::Diffuse{color_diffuse: material_color, ..} => intensity * light_color * material_color,
+                }
+            },
+            Light::Point{pos, color: light_color} => {
+                let v = pos - intersection.pos;
+                let attenuation = (1.0/v.len())*(1.0/v.len());
+                let intensity = f32::max(intersection.normal * Vec3n::from(v), 0.0);
+                match self {
+                    Material::Diffuse{color_diffuse: material_color, ..} =>
+                        attenuation * intensity * light_color * material_color,
+                }
+            },
+        }
     }
 }

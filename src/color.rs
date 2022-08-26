@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Color {
     pub r: f32,
     pub g: f32,
@@ -42,10 +42,6 @@ impl Color {
             b: f32::powf(self.b, exp),
         }
     }
-}
-
-impl Default for Color {
-    fn default() -> Self { Color::new(0.0) }
 }
 
 impl_op_ex!(+ |a: &Color, b: &Color| -> Color {

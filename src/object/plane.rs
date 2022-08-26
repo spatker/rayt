@@ -38,9 +38,9 @@ impl Intersect for Plane {
 }
 
 impl Shade for Plane {
-    fn get_color(&self, intersection: &Intersection, lights: &[Light]) -> Color {
+    fn get_color(&self, intersection: &Intersection, light: &Light) -> Color {
         //Color::from_hex("#FF0000").unwrap()
-        self.material.get_color(intersection, lights)
+        self.material.get_color(intersection, light)
     }
 }
 

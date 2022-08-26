@@ -11,7 +11,7 @@ pub trait Intersect {
 }
 
 pub trait Shade {
-    fn get_color(&self, intersection: &Intersection, lights: &[Light]) -> Color;
+    fn get_color(&self, intersection: &Intersection, light: &Light) -> Color;
 }
 
 pub trait Object: Intersect + Shade {}

@@ -42,8 +42,9 @@ impl Scene {
         objs.push(Box::new(plane));
 
         let lights = vec![
-            Light::Directional{dir: Vec3n::new(1.0, 1.0, 1.0), color: Color::new(0.2)},
-            Light::Point{pos: Vec3{x: 3.0, y: -7.0, z: 8.0}, color: Color::new(20.0)},
+            Light::Directional{direction: Vec3n::new(1.0, 1.0, 1.0), color: Color::new(0.2)},
+            Light::Point{pos: Vec3{x: 3.0, y: -7.0, z: 8.0}, color: color_orange*20.0},
+            Light::Point{pos: Vec3{x: -10.0, y: -7.0, z: 8.0}, color: color_red*20.0},
             Light::Ambient{color: color_sky}
         ];
         Scene{camera, objs, lights}
@@ -71,9 +72,29 @@ impl Scene {
         })
     }
 
+    pub fn in_shadow(&self, intersection: &Intersection, light: &Light) -> bool {
+        if let Some(shadow_ray) = light.shadow_ray(&intersection) {
+            if let Some((_, shadow_intersection)) = self.first_intersect(&shadow_ray) {
+                light.is_in_shadow(intersection, &shadow_intersection)
+            } else {
+                true
+            }
+        } else {
+            false
+        }
+    }
+
     pub fn trace(&self, ray: &Ray) -> Color {
         if let Some((object, intersection)) = self.first_intersect(ray){
-            object.get_color(&intersection, &self.lights)
+            self.lights.par_iter().map(|light|{
+                if self.in_shadow(&intersection, light) {
+                    Color::default()
+                } else {
+                    object.get_color(&intersection, light)
+                }
+            }).reduce(|| Color::default(), |a, b| {
+                a + b
+            })
         } else {
             self.lights.par_iter().map(|light|{
                 match light {
