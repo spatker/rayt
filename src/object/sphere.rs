@@ -1,7 +1,7 @@
 use crate::vec3::{Vec3, Vec3n};
 use crate::object::{Object, Intersect, Shade, Solution, material::Material, solve_quadratic};
 use crate::ray::{Ray, Intersection};
-use crate::object::light::Light;
+use crate::object::light::{Light, AmbientLight};
 use crate::color::Color;
 
 pub struct Sphere{
@@ -40,6 +40,9 @@ impl Intersect for Sphere {
 impl Shade for Sphere {
     fn get_color(&self, intersection: &Intersection, ray: &Ray, light: &Light) -> Color {
         self.material.get_color(intersection, ray, light)
+    }
+    fn get_color_ambient(&self, light: &AmbientLight) -> Color {
+        self.material.get_color_ambient(light)
     }
 }
 

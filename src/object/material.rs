@@ -1,6 +1,6 @@
 use crate::color::Color;
 use crate::ray::{Intersection, Ray};
-use crate::object::light::Light;
+use crate::object::light::{Light, AmbientLight};
 use crate::object::Shade;
 use crate::vec3::{Vec3, Vec3n};
 
@@ -17,11 +17,6 @@ impl Shade for Material {
     fn get_color(&self, intersection: &Intersection, ray: &Ray, light: &Light) -> Color
     {
         match light {
-            Light::Ambient{color: light_color} => {
-                match self {
-                    Material::DiffuseSpecular{color_ambient: material_color, ..} =>  light_color * material_color,
-                }
-            }
             Light::Directional{direction, color: light_color} => {
                 let diffuse_intensity = f32::max(intersection.normal * direction, 0.0);
                 let half = Vec3n::from(direction + Vec3n::from(ray.origin - intersection.pos));
@@ -46,6 +41,12 @@ impl Shade for Material {
                     },
                 }
             },
+        }
+    }
+
+    fn get_color_ambient(&self, light: &AmbientLight) -> Color {
+        match self {
+            Material::DiffuseSpecular{color_ambient, ..} =>  light.color * color_ambient
         }
     }
 }

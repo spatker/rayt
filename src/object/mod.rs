@@ -4,7 +4,7 @@ pub mod light;
 pub mod material;
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
-use crate::object::light::Light;
+use crate::object::light::{Light, AmbientLight};
 
 pub trait Intersect {
     fn intersect(&self, ray: &Ray) -> Option<Intersection>;
@@ -12,6 +12,7 @@ pub trait Intersect {
 
 pub trait Shade {
     fn get_color(&self, intersection: &Intersection, ray: &Ray, light: &Light) -> Color;
+    fn get_color_ambient(&self, light: &AmbientLight) -> Color;
 }
 
 pub trait Object: Intersect + Shade {}

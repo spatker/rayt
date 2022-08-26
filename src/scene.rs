@@ -2,7 +2,7 @@ use crate::camera::Camera;
 use crate::render::{Image, Resolution};
 use crate::vec3::{Vec3, Vec3n};
 use crate::object::Object;
-use crate::object::light::Light;
+use crate::object::light::{Light, AmbientLight};
 use crate::object::material::Material;
 use crate::object::{sphere::Sphere, plane::Plane};
 use crate::ray::{Ray, Intersection};
@@ -15,6 +15,7 @@ pub struct Scene {
     camera: Camera,
     objs: Vec<Box<dyn Object + Sync>>,
     lights: Vec<Light>,
+    ambient_light: AmbientLight,
 }
 
 impl Scene {
@@ -51,12 +52,12 @@ impl Scene {
         objs.push(Box::new(plane));
 
         let lights = vec![
-            Light::Directional{direction: Vec3n::new(0.0, 0.0, 1.0), color: Color::new(0.2)},
+            Light::Directional{direction: Vec3n::new(1.0, 1.0, 1.0), color: Color::new(0.2)},
             Light::Point{pos: Vec3{x: 3.0, y: -7.0, z: 8.0}, color: color_orange*20.0},
             Light::Point{pos: Vec3{x: -3.0, y: -7.0, z: 8.0}, color: color_red*20.0},
-            Light::Ambient{color: color_sky}
         ];
-        Scene{camera, objs, lights}
+        let ambient_light = AmbientLight{color: color_sky};
+        Scene{camera, objs, lights, ambient_light}
     }
 
     pub fn render(&self, resolution: Resolution) -> Image {
@@ -82,16 +83,13 @@ impl Scene {
     }
 
     pub fn in_shadow(&self, intersection: &Intersection, light: &Light) -> bool {
-        if let Some(shadow_ray) = light.shadow_ray(&intersection) {
-            if let Some((_, shadow_intersection)) = self.first_intersect(&shadow_ray) {
-                light.is_in_shadow(intersection, &shadow_intersection)
-            } else {
-                false
-            }
+        let shadow_ray = light.shadow_ray(&intersection);
+        if let Some((_, shadow_intersection)) = self.first_intersect(&shadow_ray) {
+            light.is_in_shadow(intersection, &shadow_intersection)
         } else {
             false
         }
-    }
+    } 
 
     pub fn trace(&self, ray: &Ray) -> Color {
         if let Some((object, intersection)) = self.first_intersect(ray){
@@ -103,16 +101,9 @@ impl Scene {
                 }
             }).reduce(|| Color::default(), |a, b| {
                 a + b
-            })
+            }) + object.get_color_ambient(&self.ambient_light)
         } else {
-            self.lights.par_iter().map(|light|{
-                match light {
-                    Light::Ambient{color: light_color} => *light_color,
-                    _ => Color::default()
-                }
-            }).reduce(|| Color::default(), |a, b| {
-                a + b
-            })
+            self.ambient_light.color
         }
     }
 }
