@@ -42,7 +42,8 @@ impl Scene {
         objs.push(Box::new(plane));
 
         let lights = vec![
-            Light::Directional{dir: Vec3n::new(0.0, 0.0, 1.0), color: Color::new(1.0)},
+            Light::Directional{dir: Vec3n::new(1.0, 1.0, 1.0), color: Color::new(0.2)},
+            Light::Point{pos: Vec3{x: 3.0, y: -7.0, z: 8.0}, color: Color::new(20.0)},
             Light::Ambient{color: color_sky}
         ];
         Scene{camera, objs, lights}
