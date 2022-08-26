@@ -34,6 +34,14 @@ impl Color {
             Err(HexParseError)
         }
     }
+
+    pub fn pow(&self, exp: f32) -> Color {
+        Color {
+            r: f32::powf(self.r, exp),
+            g: f32::powf(self.g, exp),
+            b: f32::powf(self.b, exp),
+        }
+    }
 }
 
 impl Default for Color {
@@ -72,10 +80,26 @@ impl_op_ex_commutative!(* |a: &Color, b: f32| -> Color {
     }
 });
 
+impl_op_ex_commutative!(+ |a: &Color, b: f32| -> Color {
+    Color {
+        r: a.r + b,
+        g: a.g + b,
+        b: a.b + b,
+    }
+});
+
 impl_op_ex!(/ |a: &Color, b: f32| -> Color {
     Color {
         r: a.r / b,
         g: a.g / b,
         b: a.b / b,
+    }
+});
+
+impl_op_ex!(/ |a: &Color, b: &Color| -> Color {
+    Color {
+        r: a.r / b.r,
+        g: a.g / b.g,
+        b: a.b / b.b,
     }
 });

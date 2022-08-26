@@ -50,9 +50,18 @@ impl Image {
         let mut data = vec![0; self.resolution.width * self.resolution.height * 3];
         for (i,c) in self.data.iter().enumerate() {
             let offset = i*3;
-            data[offset] = (c.r*255.0) as u8;
-            data[offset+1] = (c.g*255.0) as u8;
-            data[offset+2] = (c.b*255.0) as u8;
+
+            // filmic tonemap formula by Jim Hejl and Richard Burgess-Dawson
+            let x = Color{
+                r: f32::max(0.0,c.r-0.004),
+                g: f32::max(0.0,c.g-0.004),
+                b: f32::max(0.0,c.b-0.004),
+            };
+            let color = (x*(6.2*x+0.5))/(x*(6.2*x+1.7)+0.06);
+
+            data[offset] = (color.r*255.0) as u8;
+            data[offset+1] = (color.g*255.0) as u8;
+            data[offset+2] = (color.b*255.0) as u8;
         }
         data
     }
