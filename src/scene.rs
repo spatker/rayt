@@ -3,12 +3,14 @@ use crate::render::{Image, Resolution};
 use crate::vec3::{Vec3, Vec3n};
 use crate::object::Object;
 use crate::object::light::{Light, AmbientLight};
-use crate::object::material::Material;
+use crate::object::material::{DiffuseSpecular, Metalic};
 use crate::object::{sphere::Sphere, plane::Plane};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 
 use rayon::prelude::*;
+
+const MAX_RECURSION_DEPTH : u8 = 8;
 
 
 pub struct Scene {
@@ -35,20 +37,21 @@ impl Scene {
         let mut objs: Vec<Box<dyn Object + Sync>> = Vec::new();
 
         let color = color_red * color_orange;
-        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color * 0.2, color_specular: color, shineness: 128.0};
-        let sphere = Sphere::new(Vec3{x: 0.0, y: -3.0, z: 5.0}, 3.0, material);
+        let material = DiffuseSpecular{diffuse: color, ambient: color * 0.2, specular: color, shineness: 128.0};
+        let material = Metalic::gold();
+        let sphere = Sphere::new(Vec3{x: 0.0, y: -3.0, z: 5.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_red * 2.0;
-        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color * 0.2, color_specular: color, shineness: 128.0};
-        let sphere = Sphere::new(Vec3{x: 4.0, y: 0.0, z: 3.0}, 3.0, material);
+        let material = DiffuseSpecular{diffuse: color, ambient: color * 0.2, specular: color, shineness: 128.0};
+        let sphere = Sphere::new(Vec3{x: 4.0, y: 0.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_red * color_red;
-        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color, color_specular: color, shineness: 128.0};
-        let sphere = Sphere::new(Vec3{x: -4.0, y: 0.0, z: 3.0}, 3.0, material);
+        let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 128.0};
+        let sphere = Sphere::new(Vec3{x: -4.0, y: 0.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_orange;
-        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color, color_specular: color, shineness: 2.0};
-        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), material);
+        let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
+        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Box::new(material));
         objs.push(Box::new(plane));
 
         let lights = vec![
@@ -89,21 +92,27 @@ impl Scene {
         } else {
             false
         }
-    } 
+    }
 
-    pub fn trace(&self, ray: &Ray) -> Color {
+    pub fn trace(&self, ray: &Ray, depth: u8) -> Color {
+        if depth > MAX_RECURSION_DEPTH { return self.ambient_light.color }
+
         if let Some((object, intersection)) = self.first_intersect(ray){
             self.lights.par_iter().map(|light|{
-                if self.in_shadow(&intersection, light) {
+                if let Some((attenuation, next_ray)) = object.next_ray(&intersection, ray) {
+                    attenuation * self.trace(&next_ray, depth+1)
+                } else if self.in_shadow(&intersection, light) {
                     Color::default()
                 } else {
                     object.get_color(&intersection, ray, light)
                 }
             }).reduce(|| Color::default(), |a, b| {
                 a + b
-            }) + object.get_color_ambient(&self.ambient_light)
-        } else {
+            }) + object.get_color_ambient(&intersection, ray, &self.ambient_light)
+        } else if depth == 0{
             self.ambient_light.color
+        } else {
+            Color::default()
         }
     }
 }

@@ -52,6 +52,6 @@ impl Camera {
             origin: self.pos,
             direction: Vec3n::from(plane_intersection - self.pos),
         };
-        scene.trace(&ray)
+        scene.trace(&ray, 0)
     }
 }

@@ -6,13 +6,16 @@ use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 use crate::object::light::{Light, AmbientLight};
 
+const RAY_START_EPSILON: f32 = 1e-3;
+
 pub trait Intersect {
     fn intersect(&self, ray: &Ray) -> Option<Intersection>;
 }
 
 pub trait Shade {
+    fn next_ray(&self, intersection: &Intersection, ray: &Ray) -> Option<(Color, Ray)>;
     fn get_color(&self, intersection: &Intersection, ray: &Ray, light: &Light) -> Color;
-    fn get_color_ambient(&self, light: &AmbientLight) -> Color;
+    fn get_color_ambient(&self, intersection: &Intersection, ray: &Ray, light: &AmbientLight) -> Color;
 }
 
 pub trait Object: Intersect + Shade {}

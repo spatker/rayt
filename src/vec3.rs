@@ -1,3 +1,4 @@
+use std::ops::Neg;
 use std::ops;
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -43,12 +44,11 @@ impl Vec3n {
         )
     }
 
-    pub fn flip(&self) -> Self {
-        Vec3n{
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
+    // first paramater is the normal (N)
+    pub fn reflect(&self, incoming: &Self) -> Self {
+        Vec3n::from(
+            Vec3::from(incoming) - (2.0* (self * incoming)) * self
+        )
     }
 }
 
@@ -82,6 +82,18 @@ impl From<Vec3> for Vec3n {
         let n = v.norm();
         Vec3n {x: n.x, y: n.y, z: n.z}
     }
+}
+
+impl Neg for Vec3n {
+    type Output = Self;
+    fn neg(self) -> Self {
+        Vec3n{
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
+    }
+
 }
 
 impl_op_ex!(+ |a: &Vec3, b: &Vec3| -> Vec3 {

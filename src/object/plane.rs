@@ -1,5 +1,5 @@
 use crate::vec3::{Vec3, Vec3n};
-use crate::object::{Object, Intersect, Shade, material::Material};
+use crate::object::{Object, Intersect, Shade};
 use crate::ray::{Ray, Intersection};
 use crate::object::light::{Light, AmbientLight};
 use crate::color::Color;
@@ -13,11 +13,11 @@ pub struct Plane{
     pos: Vec3,
     normal: Vec3n,
     size: Size,
-    material: Material,
+    material: Box::<dyn Shade + Sync>,
 }
 
 impl Plane {
-    pub fn new(pos: Vec3, normal: Vec3n,  size: (f32, f32), material: Material) -> Plane {
+    pub fn new(pos: Vec3, normal: Vec3n,  size: (f32, f32), material: Box::<dyn Shade+ Sync>) -> Plane {
         Plane{pos, normal, size: Size{x: size.0, y: size.1}, material }
     }
 }
@@ -42,8 +42,12 @@ impl Shade for Plane {
         self.material.get_color(intersection, ray, light)
     }
 
-    fn get_color_ambient(&self, light: &AmbientLight) -> Color {
-        self.material.get_color_ambient(light)
+    fn get_color_ambient(&self, intersection: &Intersection, ray: &Ray, light: &AmbientLight) -> Color {
+        self.material.get_color_ambient(intersection, ray, light)
+    }
+
+    fn next_ray(&self, intersection: &Intersection, ray: &Ray) -> Option<(Color, Ray)> {
+        self.material.next_ray(intersection, ray)
     }
 }
 
