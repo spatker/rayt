@@ -32,19 +32,28 @@ impl Scene {
 
 
         let mut objs: Vec<Box<dyn Object + Sync>> = Vec::new();
-        let sphere = Sphere::new(Vec3{x: 0.0, y: -3.0, z: 5.0}, 3.0, Material::Diffuse{color_diffuse: color_red, color_ambient: color_red * 0.4});
+
+        let color = color_red * color_orange;
+        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color * 0.2, color_specular: color, shineness: 128.0};
+        let sphere = Sphere::new(Vec3{x: 0.0, y: -3.0, z: 5.0}, 3.0, material);
         objs.push(Box::new(sphere));
-        let sphere = Sphere::new(Vec3{x: 4.0, y: 0.0, z: 3.0}, 3.0, Material::Diffuse{color_diffuse: color_red, color_ambient: color_red * 0.4});
+        let color = color_red * 2.0;
+        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color * 0.2, color_specular: color, shineness: 128.0};
+        let sphere = Sphere::new(Vec3{x: 4.0, y: 0.0, z: 3.0}, 3.0, material);
         objs.push(Box::new(sphere));
-        let sphere = Sphere::new(Vec3{x: -4.0, y: 0.0, z: 3.0}, 3.0, Material::Diffuse{color_diffuse: color_red, color_ambient: color_red * 0.4});
+        let color = color_red * color_red;
+        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color, color_specular: color, shineness: 128.0};
+        let sphere = Sphere::new(Vec3{x: -4.0, y: 0.0, z: 3.0}, 3.0, material);
         objs.push(Box::new(sphere));
-        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Material::Diffuse{color_diffuse: color_orange, color_ambient: color_orange * 0.4});
+        let color = color_orange;
+        let material = Material::DiffuseSpecular{color_diffuse: color, color_ambient: color, color_specular: color, shineness: 2.0};
+        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), material);
         objs.push(Box::new(plane));
 
         let lights = vec![
-            Light::Directional{direction: Vec3n::new(1.0, 1.0, 1.0), color: Color::new(0.2)},
+            Light::Directional{direction: Vec3n::new(0.0, 0.0, 1.0), color: Color::new(0.2)},
             Light::Point{pos: Vec3{x: 3.0, y: -7.0, z: 8.0}, color: color_orange*20.0},
-            Light::Point{pos: Vec3{x: -10.0, y: -7.0, z: 8.0}, color: color_red*20.0},
+            Light::Point{pos: Vec3{x: -3.0, y: -7.0, z: 8.0}, color: color_red*20.0},
             Light::Ambient{color: color_sky}
         ];
         Scene{camera, objs, lights}
@@ -77,7 +86,7 @@ impl Scene {
             if let Some((_, shadow_intersection)) = self.first_intersect(&shadow_ray) {
                 light.is_in_shadow(intersection, &shadow_intersection)
             } else {
-                true
+                false
             }
         } else {
             false
@@ -90,7 +99,7 @@ impl Scene {
                 if self.in_shadow(&intersection, light) {
                     Color::default()
                 } else {
-                    object.get_color(&intersection, light)
+                    object.get_color(&intersection, ray, light)
                 }
             }).reduce(|| Color::default(), |a, b| {
                 a + b

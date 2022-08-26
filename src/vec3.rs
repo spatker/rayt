@@ -42,6 +42,14 @@ impl Vec3n {
             &Vec3::from(self).cross(&Vec3::from(rhs))
         )
     }
+
+    pub fn flip(&self) -> Self {
+        Vec3n{
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
+    }
 }
 
 impl From<f32> for Vec3 {
@@ -81,6 +89,22 @@ impl_op_ex!(+ |a: &Vec3, b: &Vec3| -> Vec3 {
         x: a.x + b.x,
         y: a.y + b.y,
         z: a.z + b.z,
+    }
+});
+
+impl_op_ex!(+ |a: &Vec3n, b: &Vec3n| -> Vec3 {
+    Vec3 {
+        x: a.x + b.x,
+        y: a.y + b.y,
+        z: a.z + b.z,
+    }
+});
+
+impl_op_ex!(- |a: &Vec3n, b: &Vec3n| -> Vec3 {
+    Vec3 {
+        x: a.x - b.x,
+        y: a.y - b.y,
+        z: a.z - b.z,
     }
 });
 

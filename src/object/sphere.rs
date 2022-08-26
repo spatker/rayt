@@ -26,7 +26,9 @@ impl Intersect for Sphere {
             Solution::None => None,
             Solution::OneRoot{..} => None,
             Solution::TwoRoots{t1, t2} => {
-                let t = f32::min(t1,t2);
+                assert!(t1 >= t2);
+                if t1 <= 0. {return None}
+                let t = if t2 > 0. { t2 } else { t1 };
                 let normal = Vec3n::from((ray.at(t) - self.pos)/self.r);
                 let pos = ray.at(t);
                 Some(Intersection{normal, pos, t})
@@ -36,8 +38,8 @@ impl Intersect for Sphere {
 }
 
 impl Shade for Sphere {
-    fn get_color(&self, intersection: &Intersection, light: &Light) -> Color {
-        self.material.get_color(intersection, light)
+    fn get_color(&self, intersection: &Intersection, ray: &Ray, light: &Light) -> Color {
+        self.material.get_color(intersection, ray, light)
     }
 }
 
