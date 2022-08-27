@@ -17,11 +17,13 @@ impl Light {
         match self {
             Light::Directional{direction,..} => Ray{
                 origin: intersection.pos + RAY_START_EPSILON * intersection.normal,
-                direction: *direction
+                direction: *direction,
+                inside: false
             },
             Light::Point{pos,..} => Ray{
                 origin: *pos,
-                direction: Vec3n::from(intersection.pos - pos)
+                direction: Vec3n::from(intersection.pos - pos),
+                inside: false
             },
         }
     }

@@ -3,14 +3,14 @@ use crate::render::{Image, Resolution};
 use crate::vec3::{Vec3, Vec3n};
 use crate::object::Object;
 use crate::object::light::{Light, AmbientLight};
-use crate::object::material::{DiffuseSpecular, Metalic};
+use crate::object::material::{DiffuseSpecular, Metalic, Refractive};
 use crate::object::{sphere::Sphere, plane::Plane};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 
 use rayon::prelude::*;
 
-const MAX_RECURSION_DEPTH : u8 = 8;
+const MAX_RECURSION_DEPTH : u8 = 3;
 
 
 pub struct Scene {
@@ -38,19 +38,20 @@ impl Scene {
 
         let color = color_red * color_orange;
         let material = DiffuseSpecular{diffuse: color, ambient: color * 0.2, specular: color, shineness: 128.0};
-        let material = Metalic::gold();
+        let material = Refractive::new(&Color::new(1.1));
         let sphere = Sphere::new(Vec3{x: 0.0, y: -3.0, z: 5.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_red * 2.0;
         let material = DiffuseSpecular{diffuse: color, ambient: color * 0.2, specular: color, shineness: 128.0};
-        let sphere = Sphere::new(Vec3{x: 4.0, y: 0.0, z: 3.0}, 3.0, Box::new(material));
+        let sphere = Sphere::new(Vec3{x: 4.0, y: 2.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_red * color_red;
         let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 128.0};
-        let sphere = Sphere::new(Vec3{x: -4.0, y: 0.0, z: 3.0}, 3.0, Box::new(material));
+        let sphere = Sphere::new(Vec3{x: -4.0, y: 2.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_orange;
         let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
+        let material = Metalic::gold();
         let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Box::new(material));
         objs.push(Box::new(plane));
 
@@ -88,7 +89,9 @@ impl Scene {
     pub fn in_shadow(&self, intersection: &Intersection, light: &Light) -> bool {
         let shadow_ray = light.shadow_ray(&intersection);
         if let Some((_, shadow_intersection)) = self.first_intersect(&shadow_ray) {
-            light.is_in_shadow(intersection, &shadow_intersection)
+            false
+            // turning off shadows until global illumination
+            // light.is_in_shadow(intersection, &shadow_intersection)
         } else {
             false
         }
@@ -97,22 +100,22 @@ impl Scene {
     pub fn trace(&self, ray: &Ray, depth: u8) -> Color {
         if depth > MAX_RECURSION_DEPTH { return self.ambient_light.color }
 
-        if let Some((object, intersection)) = self.first_intersect(ray){
-            self.lights.par_iter().map(|light|{
-                if let Some((attenuation, next_ray)) = object.next_ray(&intersection, ray) {
-                    attenuation * self.trace(&next_ray, depth+1)
-                } else if self.in_shadow(&intersection, light) {
-                    Color::default()
-                } else {
-                    object.get_color(&intersection, ray, light)
-                }
-            }).reduce(|| Color::default(), |a, b| {
-                a + b
-            }) + object.get_color_ambient(&intersection, ray, &self.ambient_light)
-        } else if depth == 0{
-            self.ambient_light.color
+        if let Some((object, intersection)) = self.first_intersect(ray) {
+            if let Some(rays) = object.scatter(&intersection, ray) {
+                rays.par_iter().map(|(attenuation, next_ray)| {
+                    attenuation * self.trace(&next_ray, depth + 1)
+                }).reduce(|| Color::default(), |a, b| { a + b })
+            } else {
+                self.lights.par_iter().map(|light| {
+                    if self.in_shadow(&intersection, light) {
+                        Color::default()
+                    } else {
+                        object.get_color(&intersection, ray, light)
+                    }
+                }).reduce(|| Color::default(), |a, b| {a + b}) + object.get_color_ambient(&intersection, ray, &self.ambient_light)
+            }
         } else {
-            Color::default()
+            self.ambient_light.color
         }
     }
 }

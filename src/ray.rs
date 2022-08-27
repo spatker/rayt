@@ -2,7 +2,8 @@ use crate::vec3::{Vec3, Vec3n};
 
 pub struct Ray {
     pub origin: Vec3,
-    pub direction: Vec3n
+    pub direction: Vec3n,
+    pub inside: bool
 }
 
 impl Ray {

@@ -46,8 +46,8 @@ impl Shade for Plane {
         self.material.get_color_ambient(intersection, ray, light)
     }
 
-    fn next_ray(&self, intersection: &Intersection, ray: &Ray) -> Option<(Color, Ray)> {
-        self.material.next_ray(intersection, ray)
+    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Option<Vec<(Color, Ray)>> {
+        self.material.scatter(intersection, ray)
     }
 }
 

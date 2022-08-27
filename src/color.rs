@@ -84,7 +84,7 @@ impl_op_ex_commutative!(+ |a: &Color, b: f32| -> Color {
     }
 });
 
-impl_op_ex_commutative!(- |a: &Color, b: f32| -> Color {
+impl_op_ex!(- |a: &Color, b: f32| -> Color {
     Color {
         r: a.r - b,
         g: a.g - b,

@@ -13,7 +13,7 @@ pub trait Intersect {
 }
 
 pub trait Shade {
-    fn next_ray(&self, intersection: &Intersection, ray: &Ray) -> Option<(Color, Ray)>;
+    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Option<Vec<(Color, Ray)>>;
     fn get_color(&self, intersection: &Intersection, ray: &Ray, light: &Light) -> Color;
     fn get_color_ambient(&self, intersection: &Intersection, ray: &Ray, light: &AmbientLight) -> Color;
 }

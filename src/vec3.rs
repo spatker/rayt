@@ -50,6 +50,17 @@ impl Vec3n {
             Vec3::from(incoming) - (2.0* (self * incoming)) * self
         )
     }
+
+    // first paramater is the normal (N)
+    pub fn refract(&self, incoming: &Self, n: f32) -> Option<Self> {
+        let cos_theta = f32::min(self * incoming, 1.0);
+        let k = 1.0 - (n * n * (1.0 - (cos_theta * cos_theta)));
+        if k > 0. {
+            Some(Vec3n::from(n * incoming - (n * (self * incoming) + f32::sqrt(k)) * self))
+        } else {
+            None
+        }
+    }
 }
 
 impl From<f32> for Vec3 {
@@ -145,6 +156,14 @@ impl_op_ex_commutative!(* |a: &Vec3, b: f32| -> Vec3 {
         x: a.x * b,
         y: a.y * b,
         z: a.z * b,
+    }
+});
+
+impl_op_ex_commutative!(+ |a: &Vec3, b: f32| -> Vec3 {
+    Vec3 {
+        x: a.x + b,
+        y: a.y + b,
+        z: a.z + b,
     }
 });
 

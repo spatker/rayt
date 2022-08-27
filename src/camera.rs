@@ -51,6 +51,7 @@ impl Camera {
         let ray = Ray {
             origin: self.pos,
             direction: Vec3n::from(plane_intersection - self.pos),
+            inside: false
         };
         scene.trace(&ray, 0)
     }
