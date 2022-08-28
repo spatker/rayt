@@ -26,8 +26,9 @@ impl Vec3 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub fn norm(&self) -> Self {
-        self / self.len()
+    pub fn norm(&self) -> Vec3n {
+        let v = self / self.len();
+        Vec3n {x: v.x, y: v.y, z: v.z}
     }
 
     pub fn cross(&self, rhs: &Self) -> Self {
@@ -77,9 +78,17 @@ impl Vec3n {
         }
     }
 
-    pub fn random() -> Self {
+    pub fn random_sphere() -> Self {
         loop {
             let p = Vec3::random(-1.0, 1.0);
+            if p.len_squared() >= 1.0 {continue} else {return Vec3n::from(p)}
+        }
+    }
+
+    pub fn random_disc() -> Self {
+        loop {
+            let mut p = Vec3::random(-1.0, 1.0);
+            p.z = 0.;
             if p.len_squared() >= 1.0 {continue} else {return Vec3n::from(p)}
         }
     }
@@ -112,8 +121,7 @@ impl From<&Vec3> for Vec3n {
 
 impl From<Vec3> for Vec3n {
     fn from(v: Vec3) -> Self {
-        let n = v.norm();
-        Vec3n {x: n.x, y: n.y, z: n.z}
+        v.norm()
     }
 }
 
@@ -138,6 +146,14 @@ impl_op_ex!(+ |a: &Vec3, b: &Vec3| -> Vec3 {
 });
 
 impl_op_ex!(+ |a: &Vec3n, b: &Vec3n| -> Vec3 {
+    Vec3 {
+        x: a.x + b.x,
+        y: a.y + b.y,
+        z: a.z + b.z,
+    }
+});
+
+impl_op_ex_commutative!(+ |a: &Vec3n, b: &Vec3| -> Vec3 {
     Vec3 {
         x: a.x + b.x,
         y: a.y + b.y,

@@ -42,6 +42,14 @@ impl Color {
             b: f32::powf(self.b, exp),
         }
     }
+
+    pub fn fix(&self) -> Self {
+        if f32::is_nan(self.r) || f32::is_nan(self.g) || f32::is_nan(self.b) {
+            Color::default()
+        } else {
+            *self
+        }
+    }
 }
 
 impl_op_ex!(+ |a: &Color, b: &Color| -> Color {

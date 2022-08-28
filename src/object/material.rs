@@ -14,7 +14,7 @@ pub struct DiffuseSpecular {
 impl Shade for DiffuseSpecular {
 
     fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<ScatteredRay> {
-        let direction= Vec3n::from(intersection.normal + Vec3n::random());
+        let direction= Vec3n::from(intersection.normal + Vec3n::random_sphere());
         vec![ScatteredRay::Scattered{
             attenuation: self.diffuse,
             ray: Ray{

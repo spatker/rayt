@@ -23,13 +23,15 @@ impl Scene {
         let camera = Camera::new(
             90.0, 
             &Vec3{x: 0.0, y: -10.0, z: 3.0},
-            &Vec3{x: 0.0, y: -3.0, z: 4.0},
-            &Vec3n::new(0.0, 0.0, 1.0)
+            &Vec3{x: 0.0, y: -1.5, z: 3.0},
+            &Vec3n::new(0.0, 0.0, 1.0),
+            0.
         );
 
         let color_sky = Color::from_hex("#0396A6").unwrap();
         let color_orange = Color::from_hex("#F29F80").unwrap();
         let color_red = Color::from_hex("#D95578").unwrap();
+        let color_white = Color::from_hex("#FFFFFF").unwrap();
 
 
         let mut objs: Vec<Box<dyn Object + Sync>> = Vec::new();
@@ -49,21 +51,30 @@ impl Scene {
         let material = Metalic::gold();
         let sphere = Sphere::new(Vec3{x: -4.0, y: 2.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
-        let color = color_orange;
+
+        let color = color_white;
+        let box_size = 30.0;
         let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
-        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Box::new(material));
+        let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (box_size, box_size), Box::new(material));
         objs.push(Box::new(plane));
 
-        let material = Emissive{color: Color::new(4000.0)};
-        let plane = Plane::new(Vec3{x: -5.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: 0.0, y: 1.0, z: -1.0}), (2., 2.), Box::new(material));
-        objs.push(Box::new(plane));
+        // let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
+        // let plane = Plane::new(Vec3{x: 0.0, y: box_size/2., z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: -1.0, z: 0.0}), (box_size, box_size), Box::new(material));
+        // objs.push(Box::new(plane));
+        // let color = color_red;
+        // let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
+        // let plane = Plane::new(Vec3{x: box_size/2., y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: -1.0, y: 0.0, z: 0.0}), (box_size, box_size), Box::new(material));
+        // objs.push(Box::new(plane));
+        // let color = color_orange;
+        // let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
+        // let plane = Plane::new(Vec3{x: -box_size/2., y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 1.0, y: 0.0, z: 0.0}), (box_size, box_size), Box::new(material));
+        // objs.push(Box::new(plane));
 
-        let material = Emissive{color: Color::new(4000.0)};
-        let plane = Plane::new(Vec3{x: 5.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: 0.0, y: 1.0, z: -1.0}), (2., 2.), Box::new(material));
+        let material = Emissive{color: Color::new(400.0)};
+        let plane = Plane::new(Vec3{x: -15.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: 1.0, y: 1.0, z: -1.0}), (10., 10.), Box::new(material));
         objs.push(Box::new(plane));
-
-        let material = Emissive{color: Color::new(4000.0)};
-        let plane = Plane::new(Vec3{x: -2.0, y: 7.0, z: 10.0}, Vec3n::from(Vec3{x: 0.0, y: 1.0, z: -1.0}), (2., 2.), Box::new(material));
+        let material = Emissive{color: Color::new(400.0)};
+        let plane = Plane::new(Vec3{x: 15.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: 1.0, y: -1.0, z: -1.0}), (10., 10.), Box::new(material));
         objs.push(Box::new(plane));
 
         let ambient_light = AmbientLight{color: color_sky};
