@@ -27,7 +27,7 @@ impl Camera {
         Camera {pos: *pos, plane_pos, rigth, up, plane_half_size}
     }
 
-    pub fn take_picture(&self, resolution: Resolution, scene: &Scene, rays: u8) -> Image {
+    pub fn take_picture(&self, resolution: Resolution, scene: &Scene, rays: u32) -> Image {
         let mut img = Image::new(resolution);
         img.get_data().par_iter_mut().enumerate().for_each(|(idx, color)| {
             let (h,w) = resolution.get_height_width(idx);
@@ -37,7 +37,7 @@ impl Camera {
         img
     }
 
-    fn capture_pixel(&self, h: f32, w: f32, resolution: &Resolution,  scene: &Scene, rays: u8) -> Color {
+    fn capture_pixel(&self, h: f32, w: f32, resolution: &Resolution,  scene: &Scene, rays: u32) -> Color {
 
         let mut rng = thread_rng();
 

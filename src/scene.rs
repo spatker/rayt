@@ -2,20 +2,19 @@ use crate::camera::Camera;
 use crate::render::{Image, Resolution};
 use crate::vec3::{Vec3, Vec3n};
 use crate::object::Object;
-use crate::object::light::{Light, AmbientLight};
+use crate::object::light::{AmbientLight};
 use crate::object::material::{DiffuseSpecular, Metalic, Refractive};
 use crate::object::{sphere::Sphere, plane::Plane};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 
 const MAX_RECURSION_DEPTH : u8 = 8;
-const RAYS_PER_PIXEL : u8 = 16;
+const RAYS_PER_PIXEL : u32 = 32;
 
 
 pub struct Scene {
     camera: Camera,
     objs: Vec<Box<dyn Object + Sync>>,
-    lights: Vec<Light>,
     ambient_light: AmbientLight,
 }
 
@@ -46,21 +45,16 @@ impl Scene {
         objs.push(Box::new(sphere));
         let color = color_red * color_red;
         let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 128.0};
+        let material = Metalic::gold();
         let sphere = Sphere::new(Vec3{x: -4.0, y: 2.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_orange;
         let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
-        let material = Metalic::gold();
         let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Box::new(material));
         objs.push(Box::new(plane));
 
-        let lights = vec![
-            Light::Directional{direction: Vec3n::new(1.0, 1.0, 1.0), color: Color::new(0.2)},
-            Light::Point{pos: Vec3{x: 3.0, y: -7.0, z: 8.0}, color: color_orange*20.0},
-            Light::Point{pos: Vec3{x: -3.0, y: -7.0, z: 8.0}, color: color_red*20.0},
-        ];
         let ambient_light = AmbientLight{color: color_sky};
-        Scene{camera, objs, lights, ambient_light}
+        Scene{camera, objs, ambient_light}
     }
 
     pub fn render(&self, resolution: Resolution) -> Image {
@@ -85,34 +79,13 @@ impl Scene {
         }).unwrap_or(None)
     }
 
-    pub fn in_shadow(&self, intersection: &Intersection, light: &Light) -> bool {
-        let shadow_ray = light.shadow_ray(&intersection);
-        if let Some((_, shadow_intersection)) = self.first_intersect(&shadow_ray) {
-            false
-            // turning off shadows until global illumination
-            // light.is_in_shadow(intersection, &shadow_intersection)
-        } else {
-            false
-        }
-    }
-
     pub fn trace(&self, ray: &Ray, depth: u8) -> Color {
         if depth > MAX_RECURSION_DEPTH { return self.ambient_light.color }
 
         if let Some((object, intersection)) = self.first_intersect(ray) {
-            if let Some(rays) = object.scatter(&intersection, ray) {
-                rays.iter().map(|(attenuation, next_ray)| {
-                    attenuation * self.trace(&next_ray, depth + 1)
-                }).reduce(|a, b| { a + b }).unwrap_or_default()
-            } else {
-                self.lights.iter().map(|light| {
-                    if self.in_shadow(&intersection, light) {
-                        Color::default()
-                    } else {
-                        object.get_color(&intersection, ray, light)
-                    }
-                }).reduce(|a, b| {a + b}).unwrap_or_default() + object.get_color_ambient(&intersection, ray, &self.ambient_light)
-            }
+            object.scatter(&intersection, ray).iter().map(|(attenuation, next_ray)| {
+                attenuation * self.trace(&next_ray, depth + 1)
+            }).reduce(|a, b| { a + b }).unwrap_or_default()
         } else {
             self.ambient_light.color
         }

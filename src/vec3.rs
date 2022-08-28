@@ -1,6 +1,8 @@
 use std::ops::Neg;
 use std::ops;
 
+use rand::prelude::*;
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Vec3 {
     pub x: f32,
@@ -17,7 +19,11 @@ pub struct Vec3n {
 
 impl Vec3 {
     pub fn len(&self) -> f32 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+        self.len_squared().sqrt()
+    }
+
+    pub fn len_squared(&self) -> f32 {
+        self.x * self.x + self.y * self.y + self.z * self.z
     }
 
     pub fn norm(&self) -> Self {
@@ -29,6 +35,15 @@ impl Vec3 {
             x: self.y*rhs.z - self.z*rhs.y,
             y: self.z*rhs.x - self.x*rhs.z,
             z: self.x*rhs.y - self.y*rhs.x
+        }
+    }
+
+    pub fn random(min: f32, max: f32) -> Self {
+        let mut rng = thread_rng();
+        Vec3 {
+            x: rng.gen_range(min..max),
+            y: rng.gen_range(min..max),
+            z: rng.gen_range(min..max),
         }
     }
 }
@@ -59,6 +74,13 @@ impl Vec3n {
             Some(Vec3n::from(n * incoming - (n * (self * incoming) + f32::sqrt(k)) * self))
         } else {
             None
+        }
+    }
+
+    pub fn random() -> Self {
+        loop {
+            let p = Vec3::random(-1.0, 1.0);
+            if p.len_squared() >= 1.0 {continue} else {return Vec3n::from(p)}
         }
     }
 }
