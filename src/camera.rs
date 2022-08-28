@@ -4,6 +4,7 @@ use crate::color::Color;
 use crate::scene::Scene;
 use crate::ray::Ray;
 
+use indicatif::{ProgressStyle, ParallelProgressIterator};
 use rayon::prelude::*;
 use rand::prelude::*;
 
@@ -29,7 +30,9 @@ impl Camera {
 
     pub fn take_picture(&self, resolution: Resolution, scene: &Scene, rays: u32) -> Image {
         let mut img = Image::new(resolution);
-        img.get_data().par_iter_mut().enumerate().for_each(|(idx, color)| {
+        let style = ProgressStyle::with_template("[{elapsed}] {bar:40.cyan/blue} {pos:>7}/{len:7} {eta}").unwrap();
+
+        img.get_data().par_iter_mut().progress_with_style(style).enumerate().for_each(|(idx, color)| {
             let (h,w) = resolution.get_height_width(idx);
             *color = self.capture_pixel(h as f32, w as f32, &resolution, scene, rays);
         });
