@@ -5,6 +5,7 @@ use crate::scene::Scene;
 use crate::ray::Ray;
 
 use rayon::prelude::*;
+use rand::prelude::*;
 
 #[derive(Debug)]
 pub struct Camera {
@@ -26,33 +27,41 @@ impl Camera {
         Camera {pos: *pos, plane_pos, rigth, up, plane_half_size}
     }
 
-    pub fn take_picture(&self, resolution: Resolution, scene: &Scene) -> Image {
+    pub fn take_picture(&self, resolution: Resolution, scene: &Scene, rays: u8) -> Image {
         let mut img = Image::new(resolution);
         img.get_data().par_iter_mut().enumerate().for_each(|(idx, color)| {
             let (h,w) = resolution.get_height_width(idx);
-            *color = self.capture_pixel(h as f32, w as f32, &resolution, scene);
+            *color = self.capture_pixel(h as f32, w as f32, &resolution, scene, rays);
         });
 
         img
     }
 
-    fn capture_pixel(&self, h: f32, w: f32, resolution: &Resolution,  scene: &Scene) -> Color {
-        let pos_on_plane = Vec3{
-            x: (w + 0.5 - (resolution.width/2) as f32) / (resolution.width/2) as f32,
-            y: (h + 0.5 - (resolution.height/2) as f32) / (resolution.height/2) as f32,
-            z: 0.0
-        };
-      
-        let plane_intersection =
-            self.plane_pos +
-            self.plane_half_size * pos_on_plane.x * self.rigth +
-            self.plane_half_size * pos_on_plane.y * self.up;
+    fn capture_pixel(&self, h: f32, w: f32, resolution: &Resolution,  scene: &Scene, rays: u8) -> Color {
 
-        let ray = Ray {
-            origin: self.pos,
-            direction: Vec3n::from(plane_intersection - self.pos),
-            inside: false
-        };
-        scene.trace(&ray, 0)
+        let mut rng = thread_rng();
+
+
+        (0..rays).map(|_| {
+            let rand_x = rng.gen_range(0.0..1.0);
+            let rand_y = rng.gen_range(0.0..1.0);
+            let pos_on_plane = Vec3{
+                x: (w + rand_x - (resolution.width/2) as f32) / (resolution.width/2) as f32,
+                y: (h + rand_y - (resolution.height/2) as f32) / (resolution.height/2) as f32,
+                z: 0.0
+            };
+
+            let plane_intersection =
+                self.plane_pos +
+                self.plane_half_size * pos_on_plane.x * self.rigth +
+                self.plane_half_size * pos_on_plane.y * self.up;
+
+            let ray = Ray {
+                origin: self.pos,
+                direction: Vec3n::from(plane_intersection - self.pos),
+                inside: false
+            };
+            scene.trace(&ray, 0)
+        }).fold(Color::default(), |a,b| { a+ b}) / rays as f32
     }
 }

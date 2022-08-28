@@ -8,9 +8,8 @@ use crate::object::{sphere::Sphere, plane::Plane};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 
-use rayon::prelude::*;
-
-const MAX_RECURSION_DEPTH : u8 = 3;
+const MAX_RECURSION_DEPTH : u8 = 8;
+const RAYS_PER_PIXEL : u8 = 16;
 
 
 pub struct Scene {
@@ -65,16 +64,16 @@ impl Scene {
     }
 
     pub fn render(&self, resolution: Resolution) -> Image {
-        self.camera.take_picture(resolution, &self)
+        self.camera.take_picture(resolution, &self, RAYS_PER_PIXEL)
     }
 
     pub fn first_intersect(&self, ray: &Ray) -> Option<(&Box<dyn Object + Sync>, Intersection)> {
-        self.objs.par_iter().map(|o|{
+        self.objs.iter().map(|o|{
             match o.intersect(ray) {
                 Some(intersection) => Some((o, intersection)),
                 None => None
             }
-        }).reduce(|| None, |a, b| {
+        }).reduce(|a, b| {
             match (&a, &b) {
                 (Some((_, Intersection{t: ta,..})), Some((_, Intersection{t: tb,..}))) => {
                     if ta < tb { a } else { b }
@@ -83,7 +82,7 @@ impl Scene {
                 (None, Some(_)) => b,
                 _ => None,
             }
-        })
+        }).unwrap_or(None)
     }
 
     pub fn in_shadow(&self, intersection: &Intersection, light: &Light) -> bool {
@@ -102,17 +101,17 @@ impl Scene {
 
         if let Some((object, intersection)) = self.first_intersect(ray) {
             if let Some(rays) = object.scatter(&intersection, ray) {
-                rays.par_iter().map(|(attenuation, next_ray)| {
+                rays.iter().map(|(attenuation, next_ray)| {
                     attenuation * self.trace(&next_ray, depth + 1)
-                }).reduce(|| Color::default(), |a, b| { a + b })
+                }).reduce(|a, b| { a + b }).unwrap_or_default()
             } else {
-                self.lights.par_iter().map(|light| {
+                self.lights.iter().map(|light| {
                     if self.in_shadow(&intersection, light) {
                         Color::default()
                     } else {
                         object.get_color(&intersection, ray, light)
                     }
-                }).reduce(|| Color::default(), |a, b| {a + b}) + object.get_color_ambient(&intersection, ray, &self.ambient_light)
+                }).reduce(|a, b| {a + b}).unwrap_or_default() + object.get_color_ambient(&intersection, ray, &self.ambient_light)
             }
         } else {
             self.ambient_light.color
