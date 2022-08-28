@@ -1,6 +1,6 @@
 use crate::color::Color;
 use crate::ray::{Intersection, Ray};
-use crate::object::Shade;
+use crate::object::{Shade, ScatteredRay};
 use crate::vec3::{Vec3, Vec3n};
 use crate::object::RAY_START_EPSILON;
 
@@ -13,15 +13,15 @@ pub struct DiffuseSpecular {
 
 impl Shade for DiffuseSpecular {
 
-    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<(Color, Ray)> {
+    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<ScatteredRay> {
         let direction= Vec3n::from(intersection.normal + Vec3n::random());
-        vec![(
-            self.diffuse,
-            Ray{
+        vec![ScatteredRay::Scattered{
+            attenuation: self.diffuse,
+            ray: Ray{
                 origin: intersection.pos + RAY_START_EPSILON*direction,
                 direction: direction,
                 inside: false,
-            })
+            }}
         ]
     }
 }
@@ -62,15 +62,15 @@ impl Metalic {
 }
 
 impl Shade for Metalic {
-    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<(Color, Ray)> {
+    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<ScatteredRay> {
         let direction = intersection.normal.reflect(&ray.direction);
-        vec![
-            (fresnel(self.f0, -ray.direction * intersection.normal),
-            Ray {
+        vec![ScatteredRay::Scattered{
+            attenuation: fresnel(self.f0, -ray.direction * intersection.normal),
+            ray: Ray {
                 origin: intersection.pos + RAY_START_EPSILON * direction,
                 direction,
                 inside: false
-            })
+            }}
         ]
     }
 }
@@ -97,7 +97,7 @@ impl Refractive {
 }
 
 impl Shade for Refractive {
-    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<(Color, Ray)>  {
+    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<ScatteredRay>  {
         let normal = if !ray.inside { intersection.normal } else { - intersection.normal };
         //TODO: feels like this is a bug, and should be swapped, but then the whole thing breaks..
         let n = if ray.inside {self.n} else {self.n_rec};
@@ -117,10 +117,12 @@ impl Shade for Refractive {
             };
 
             let f = fresnel(self.f0, -ray.direction * normal);
-            vec![(f, reflected_ray), (Color::new(1.0) -f, refracted_ray)]
+            vec![
+                ScatteredRay::Scattered{attenuation: f, ray: reflected_ray},
+                ScatteredRay::Scattered{attenuation: Color::new(1.0) -f, ray: refracted_ray}
+            ]
         } else {
-            let f = fresnel(self.f0, -ray.direction * normal);
-            vec![(Color::new(1.), reflected_ray)]
+            vec![ScatteredRay::Scattered{attenuation: Color::new(1.0), ray: reflected_ray}]
         }
     }
 }

@@ -1,15 +1,15 @@
 use crate::camera::Camera;
 use crate::render::{Image, Resolution};
 use crate::vec3::{Vec3, Vec3n};
-use crate::object::Object;
-use crate::object::light::{AmbientLight};
+use crate::object::{Object, ScatteredRay};
+use crate::object::light::{AmbientLight, Emissive};
 use crate::object::material::{DiffuseSpecular, Metalic, Refractive};
 use crate::object::{sphere::Sphere, plane::Plane};
 use crate::ray::{Ray, Intersection};
 use crate::color::Color;
 
 const MAX_RECURSION_DEPTH : u8 = 8;
-const RAYS_PER_PIXEL : u32 = 32;
+const RAYS_PER_PIXEL : u32 = 2048;
 
 
 pub struct Scene {
@@ -41,6 +41,7 @@ impl Scene {
         objs.push(Box::new(sphere));
         let color = color_red * 2.0;
         let material = DiffuseSpecular{diffuse: color, ambient: color * 0.2, specular: color, shineness: 128.0};
+        let material = Metalic::silver();
         let sphere = Sphere::new(Vec3{x: 4.0, y: 2.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_red * color_red;
@@ -51,6 +52,18 @@ impl Scene {
         let color = color_orange;
         let material = DiffuseSpecular{diffuse: color, ambient: color, specular: color, shineness: 2.0};
         let plane = Plane::new(Vec3{x: 0.0, y: 0.0, z: 0.0}, Vec3n::from(Vec3{x: 0.0, y: 0.0, z: 1.0}), (30., 30.), Box::new(material));
+        objs.push(Box::new(plane));
+
+        let material = Emissive{color: Color::new(4000.0)};
+        let plane = Plane::new(Vec3{x: -5.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: 0.0, y: 1.0, z: -1.0}), (2., 2.), Box::new(material));
+        objs.push(Box::new(plane));
+
+        let material = Emissive{color: Color::new(4000.0)};
+        let plane = Plane::new(Vec3{x: 5.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: 0.0, y: 1.0, z: -1.0}), (2., 2.), Box::new(material));
+        objs.push(Box::new(plane));
+
+        let material = Emissive{color: Color::new(4000.0)};
+        let plane = Plane::new(Vec3{x: -2.0, y: 7.0, z: 10.0}, Vec3n::from(Vec3{x: 0.0, y: 1.0, z: -1.0}), (2., 2.), Box::new(material));
         objs.push(Box::new(plane));
 
         let ambient_light = AmbientLight{color: color_sky};
@@ -83,8 +96,13 @@ impl Scene {
         if depth > MAX_RECURSION_DEPTH { return self.ambient_light.color }
 
         if let Some((object, intersection)) = self.first_intersect(ray) {
-            object.scatter(&intersection, ray).iter().map(|(attenuation, next_ray)| {
-                attenuation * self.trace(&next_ray, depth + 1)
+            object.scatter(&intersection, ray).iter().map(|scattered_ray| {
+                match scattered_ray {
+                    ScatteredRay::Scattered{attenuation, ray: next_ray} =>
+                        attenuation * self.trace(&next_ray, depth + 1),
+                    ScatteredRay::Absorbed{color} => *color
+                }
+                
             }).reduce(|a, b| { a + b }).unwrap_or_default()
         } else {
             self.ambient_light.color

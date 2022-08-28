@@ -34,14 +34,6 @@ impl Image {
         }
     }
 
-    pub fn set_color(&mut self, height: usize, width: usize, c: Color) {
-        self.data[width + self.resolution.width*height] = c;
-    }
-
-    pub fn get_resolution(&self) -> Resolution {
-        self.resolution
-    }
-
     pub fn get_data(&mut self) -> &mut Box<[Color]> {
         &mut self.data
     }

@@ -1,7 +1,6 @@
 use crate::vec3::{Vec3, Vec3n};
-use crate::object::{Object, Intersect, Shade, Solution, solve_quadratic};
+use crate::object::{Object, Intersect, Shade, Solution, ScatteredRay, solve_quadratic};
 use crate::ray::{Ray, Intersection};
-use crate::color::Color;
 
 pub struct Sphere{
     pos: Vec3,
@@ -37,7 +36,7 @@ impl Intersect for Sphere {
 }
 
 impl Shade for Sphere {
-    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<(Color, Ray)>{
+    fn scatter(&self, intersection: &Intersection, ray: &Ray) -> Vec<ScatteredRay>{
         self.material.scatter(intersection, ray)
     }
 }
