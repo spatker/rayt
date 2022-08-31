@@ -1,5 +1,5 @@
 use crate::vec3::{Vec3, Vec3n};
-use crate::render::{Image, Resolution};
+use crate::image::{Image, Resolution};
 use crate::color::Color;
 use crate::scene::Scene;
 use crate::ray::Ray;
@@ -34,7 +34,7 @@ impl Camera {
         let mut img = Image::new(resolution);
         let style = ProgressStyle::with_template("[{elapsed}] {bar:40.cyan/blue} {pos:>7}/{len:7} {eta}").unwrap();
 
-        img.get_data().par_iter_mut().progress_with_style(style).enumerate().for_each(|(idx, color)| {
+        img.get_data_mut().par_iter_mut().progress_with_style(style).enumerate().for_each(|(idx, color)| {
             let (h,w) = resolution.get_height_width(idx);
             *color = self.capture_pixel(h as f32, w as f32, &resolution, scene, rays);
         });

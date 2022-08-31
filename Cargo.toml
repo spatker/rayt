@@ -10,6 +10,8 @@ rayon = "1.5.3"
 impl_ops = "0.1.1"
 rand = "0.8.5"
 indicatif = {version = "*", features = ["rayon"]}
+hdrldr = "*"
+structopt = "*"
 
 [profile.release]
 debug = true
