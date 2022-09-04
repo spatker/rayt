@@ -44,7 +44,7 @@ impl Scene {
         objs.push(Box::new(sphere));
         let color = color_red * 2.0;
         let material = DiffuseSpecular{diffuse: color, ambient: color * 0.2, specular: color, shineness: 128.0};
-        let material = Metalic::silver();
+        //let material = Metalic::silver();
         let sphere = Sphere::new(Vec3{x: 4.0, y: 2.0, z: 3.0}, 3.0, Box::new(material));
         objs.push(Box::new(sphere));
         let color = color_red * color_red;
@@ -73,10 +73,10 @@ impl Scene {
 
         let material = Emissive{color: Color::new(400.0)};
         let plane = Plane::new(Vec3{x: -15.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: -1.0, y: -1.0, z: -1.0}), (10., 10.), Box::new(material));
-        //objs.push(Box::new(plane));
+        objs.push(Box::new(plane));
         let material = Emissive{color: Color::new(400.0)};
         let plane = Plane::new(Vec3{x: 15.0, y: -5.0, z: 10.0}, Vec3n::from(Vec3{x: 1.0, y: -1.0, z: -1.0}), (10., 10.), Box::new(material));
-        //objs.push(Box::new(plane));
+        objs.push(Box::new(plane));
 
         let ambient_light = AmbientLight::load(hdr_path).unwrap_or(AmbientLight::new());
         Scene{camera, objs, ambient_light, rays_per_pixel}
